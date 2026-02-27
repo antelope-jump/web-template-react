@@ -14,7 +14,7 @@ export function RouteGuard({ roles }: RouteGuardProps) {
     return <Navigate replace state={{ from: location }} to="/login" />;
   }
 
-  if (roles && user && !roles.includes(user.role)) {
+  if (roles && (!user || !roles.includes(user.role))) {
     return <Navigate replace to="/403" />;
   }
 
