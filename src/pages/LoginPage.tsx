@@ -1,61 +1,56 @@
-import { useState, type FormEvent } from 'react';
+import { Alert, Button, Card, Form, Input, Typography } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuthStore } from '@/store/authStore';
+
+interface LoginForm {
+  username: string;
+  password: string;
+}
 
 export function LoginPage() {
-  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('123456');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const loading = useAuthStore((state) => state.loading);
+  const error = useAuthStore((state) => state.error);
+  const clearError = useAuthStore((state) => state.clearError);
+  const login = useAuthStore((state) => state.login);
 
   const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || '/';
 
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setLoading(true);
-    setError('');
+  const onSubmit = async (values: LoginForm) => {
+    clearError();
 
-    try {
-      await login({ username, password });
+    const success = await login(values);
+    if (success) {
       navigate(from, { replace: true });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '登录失败');
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <div className="auth-page">
-      <form className="card auth-card" onSubmit={onSubmit}>
-        <h1>登录</h1>
-        <p className="hint">演示账号：admin / 123456，或 user / 123456</p>
-        <label>
-          用户名
-          <input
-            onChange={(event) => setUsername(event.target.value)}
-            placeholder="请输入用户名"
-            value={username}
-          />
-        </label>
-        <label>
-          密码
-          <input
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="请输入密码"
-            type="password"
-            value={password}
-          />
-        </label>
-        {error ? <p className="error">{error}</p> : null}
-        <button disabled={loading} type="submit">
-          {loading ? '登录中...' : '登录'}
-        </button>
-      </form>
+      <Card style={{ width: '100%', maxWidth: 420 }}>
+        <Typography.Title level={3}>登录</Typography.Title>
+        <Typography.Paragraph type="secondary">
+          已接入真实后端接口：/auth/login + /auth/refresh
+        </Typography.Paragraph>
+        <Form<LoginForm>
+          initialValues={{ username: 'admin', password: '123456' }}
+          layout="vertical"
+          onFinish={onSubmit}
+        >
+          <Form.Item label="用户名" name="username" rules={[{ required: true, message: '请输入用户名' }]}>
+            <Input placeholder="请输入用户名" />
+          </Form.Item>
+          <Form.Item label="密码" name="password" rules={[{ required: true, message: '请输入密码' }]}>
+            <Input.Password placeholder="请输入密码" />
+          </Form.Item>
+          {error ? <Alert message={error} style={{ marginBottom: 16 }} type="error" /> : null}
+          <Button block htmlType="submit" loading={loading} type="primary">
+            登录
+          </Button>
+        </Form>
+      </Card>
     </div>
   );
 }

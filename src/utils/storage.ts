@@ -13,6 +13,18 @@ export function clearToken() {
   localStorage.removeItem(STORAGE_KEYS.accessToken);
 }
 
+export function getRefreshToken() {
+  return localStorage.getItem(STORAGE_KEYS.refreshToken);
+}
+
+export function setRefreshToken(token: string) {
+  localStorage.setItem(STORAGE_KEYS.refreshToken, token);
+}
+
+export function clearRefreshToken() {
+  localStorage.removeItem(STORAGE_KEYS.refreshToken);
+}
+
 export function getProfile(): UserProfile | null {
   const raw = localStorage.getItem(STORAGE_KEYS.userProfile);
   return raw ? (JSON.parse(raw) as UserProfile) : null;
@@ -24,4 +36,10 @@ export function setProfile(profile: UserProfile) {
 
 export function clearProfile() {
   localStorage.removeItem(STORAGE_KEYS.userProfile);
+}
+
+export function clearAuthStorage() {
+  clearToken();
+  clearRefreshToken();
+  clearProfile();
 }

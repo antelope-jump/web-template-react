@@ -1,16 +1,19 @@
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Button, Layout, Menu, Space, Tag, Typography } from 'antd';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuthStore } from '@/store/authStore';
 
 const menus = [
-  { to: '/', label: '首页' },
-  { to: '/dashboard', label: '仪表盘' },
-  { to: '/admin', label: '管理页（需 admin）' },
+  { key: '/', label: <Link to="/">首页</Link> },
+  { key: '/dashboard', label: <Link to="/dashboard">仪表盘</Link> },
+  { key: '/admin', label: <Link to="/admin">管理页（需 admin）</Link> },
 ];
 
 export function MainLayout() {
-  const { user, logout } = useAuth();
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     await logout();
@@ -18,34 +21,28 @@ export function MainLayout() {
   };
 
   return (
-    <div className="app-shell">
-      <header className="app-header">
-        <Link className="logo" to="/">
-          React Starter
-        </Link>
-        <nav className="main-nav">
-          {menus.map((item) => (
-            <NavLink
-              className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
-              key={item.to}
-              to={item.to}
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-        <div className="user-box">
-          <span>
-            当前用户：<b>{user?.name}</b>（{user?.role}）
-          </span>
-          <button onClick={handleLogout} type="button">
-            退出登录
-          </button>
-        </div>
-      </header>
-      <main className="app-main">
+    <Layout style={{ minHeight: '100vh' }}>
+      <Layout.Header style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <Typography.Title level={4} style={{ margin: 0 }}>
+          <Link style={{ color: '#fff' }} to="/">
+            React Starter
+          </Link>
+        </Typography.Title>
+        <Menu
+          items={menus}
+          mode="horizontal"
+          selectedKeys={[location.pathname]}
+          style={{ flex: 1, minWidth: 360 }}
+          theme="dark"
+        />
+        <Space>
+          <Tag color="blue">当前用户：{user?.name ?? '-'}（{user?.role ?? '-'}）</Tag>
+          <Button onClick={handleLogout}>退出登录</Button>
+        </Space>
+      </Layout.Header>
+      <Layout.Content style={{ padding: 24 }}>
         <Outlet />
-      </main>
-    </div>
+      </Layout.Content>
+    </Layout>
   );
 }
