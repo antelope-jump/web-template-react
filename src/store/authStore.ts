@@ -44,9 +44,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true, error: '' });
     try {
       const result = await authService.login(payload);
-      const backendRoutes =
-        result.routes ?? (await authService.getAuthorizedRoutes().catch(() => undefined));
-      const safeRoutes = backendRoutes ?? getFallbackAuthorizedRoutes(result.profile.role);
+      const authorizedRoutes =
+        result.routes ?? (await authService.getAuthorizedRoutes().catch(() => []));
+      const safeRoutes =
+        authorizedRoutes.length > 0
+          ? authorizedRoutes
+          : getFallbackAuthorizedRoutes(result.profile.role);
+
 
       set({
         accessToken: result.accessToken,
