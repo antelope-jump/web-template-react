@@ -1,12 +1,20 @@
+import { ConfigProvider, theme } from 'antd';
 import { RouterProvider } from 'react-router-dom';
 
-import { AuthProvider } from '@/contexts/AuthContext';
 import { router } from '@/router';
 
 export function App() {
   return (
-    <AuthProvider>
+    <ConfigProvider
+      theme={{
+        algorithm: theme.defaultAlgorithm,
+        token: {
+          colorPrimary: '#2563eb',
+          borderRadius: 10,
+        },
+      }}
+    >
       <RouterProvider router={router} />
-    </AuthProvider>
+    </ConfigProvider>
   );
 }

@@ -1,16 +1,17 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuthStore } from '@/store/authStore';
 
 interface RouteGuardProps {
   roles?: Array<'admin' | 'user'>;
 }
 
 export function RouteGuard({ roles }: RouteGuardProps) {
-  const { isAuthenticated, user } = useAuth();
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const user = useAuthStore((state) => state.user);
   const location = useLocation();
 
-  if (!isAuthenticated) {
+  if (!accessToken) {
     return <Navigate replace state={{ from: location }} to="/login" />;
   }
 
