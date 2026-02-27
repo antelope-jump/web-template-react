@@ -4,6 +4,8 @@
 
 - ✅ React 18 + Vite 6 + TypeScript 5
 - ✅ React Router 6 路由体系（含 404）
+- ✅ 支持后端返回鉴权路由并动态渲染菜单/页面
+- ✅ 页面级懒加载（`React.lazy` + `Suspense`）
 - ✅ Zustand 统一状态管理（登录态、用户信息）
 - ✅ 真实后端认证流程（登录 + 刷新 token + 登出）
 - ✅ Axios 请求封装（Token 注入 + 401 自动刷新 + 错误统一处理）
@@ -46,6 +48,8 @@ VITE_API_BASE_URL=https://your-api.example.com
   - response: `{ accessToken }`
 - `POST /auth/logout`
   - request: `{ refreshToken }`
+- `GET /auth/routes`
+  - response: `[{ path, name, component, roles? }]`
 
 ## 测试
 
