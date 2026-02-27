@@ -1,5 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
+import { useAuthStore } from '@/store/authStore';
 import { clearAuthStorage, getRefreshToken, getToken, setToken } from '@/utils/storage';
 
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
@@ -23,6 +24,17 @@ const refreshClient = axios.create({
 });
 
 let refreshingPromise: Promise<string> | null = null;
+
+const AUTH_ENDPOINTS = new Set(['/auth/login', '/auth/refresh']);
+
+function shouldSkipRefresh(url?: string) {
+  if (!url) {
+    return false;
+  }
+
+  const normalizedUrl = url.split('?')[0];
+  return [...AUTH_ENDPOINTS].some((endpoint) => normalizedUrl.endsWith(endpoint));
+}
 
 async function refreshToken() {
   const refreshTokenValue = getRefreshToken();
@@ -52,7 +64,12 @@ http.interceptors.response.use(
   async (error: AxiosError<{ message?: string }>) => {
     const config = error.config as RetryableRequestConfig | undefined;
 
-    if (error.response?.status === 401 && config && !config._retry) {
+    if (
+      error.response?.status === 401
+      && config
+      && !config._retry
+      && !shouldSkipRefresh(config.url)
+    ) {
       config._retry = true;
 
       try {
@@ -66,6 +83,12 @@ http.interceptors.response.use(
         config.headers.Authorization = `Bearer ${nextAccessToken}`;
         return http(config);
       } catch {
+        useAuthStore.setState({
+          accessToken: null,
+          refreshToken: null,
+          user: null,
+          error: '',
+        });
         clearAuthStorage();
         return Promise.reject(new Error('登录已过期，请重新登录'));
       }
