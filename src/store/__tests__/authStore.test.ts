@@ -19,6 +19,7 @@ describe('authStore', () => {
       user: null,
       loading: false,
       error: '',
+      authorizedRoutes: [],
     });
   });
 
@@ -40,4 +41,33 @@ describe('authStore', () => {
     expect(useAuthStore.getState().user?.role).toBe('admin');
     expect(useAuthStore.getState().authorizedRoutes).toHaveLength(1);
   });
+
+  it('keeps backend empty routes when login returns an empty array', async () => {
+    vi.mocked(authService.login).mockResolvedValueOnce({
+      accessToken: 'access_locked',
+      refreshToken: 'refresh_locked',
+      profile: { id: '2', name: '受限用户', role: 'user' },
+      routes: [],
+    });
+
+    const success = await useAuthStore.getState().login({ username: 'locked', password: '123456' });
+
+    expect(success).toBe(true);
+    expect(useAuthStore.getState().authorizedRoutes).toEqual([]);
+  });
+
+  it('falls back to local role routes when backend routes cannot be fetched', async () => {
+    vi.mocked(authService.login).mockResolvedValueOnce({
+      accessToken: 'access_456',
+      refreshToken: 'refresh_456',
+      profile: { id: '3', name: '普通用户', role: 'user' },
+    });
+    vi.mocked(authService.getAuthorizedRoutes).mockRejectedValueOnce(new Error('network error'));
+
+    const success = await useAuthStore.getState().login({ username: 'user', password: '123456' });
+
+    expect(success).toBe(true);
+    expect(useAuthStore.getState().authorizedRoutes.length).toBeGreaterThan(0);
+  });
+
 });
