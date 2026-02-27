@@ -1,5 +1,5 @@
 import { STORAGE_KEYS } from '@/constants/storageKeys';
-import type { UserProfile } from '@/types/auth';
+import type { AuthorizedRoute, UserProfile } from '@/types/auth';
 
 export function getToken() {
   return localStorage.getItem(STORAGE_KEYS.accessToken);
@@ -38,8 +38,22 @@ export function clearProfile() {
   localStorage.removeItem(STORAGE_KEYS.userProfile);
 }
 
+export function getAuthorizedRoutes(): AuthorizedRoute[] {
+  const raw = localStorage.getItem(STORAGE_KEYS.authorizedRoutes);
+  return raw ? (JSON.parse(raw) as AuthorizedRoute[]) : [];
+}
+
+export function setAuthorizedRoutes(routes: AuthorizedRoute[]) {
+  localStorage.setItem(STORAGE_KEYS.authorizedRoutes, JSON.stringify(routes));
+}
+
+export function clearAuthorizedRoutes() {
+  localStorage.removeItem(STORAGE_KEYS.authorizedRoutes);
+}
+
 export function clearAuthStorage() {
   clearToken();
   clearRefreshToken();
   clearProfile();
+  clearAuthorizedRoutes();
 }

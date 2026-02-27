@@ -7,6 +7,7 @@ import { App } from '@/app/App';
 vi.mock('@/services/authService', () => ({
   login: vi.fn(),
   logout: vi.fn(),
+  getAuthorizedRoutes: vi.fn(),
 }));
 
 import * as authService from '@/services/authService';
@@ -24,6 +25,11 @@ describe('auth e2e', () => {
       refreshToken: 'r1',
       profile: { id: '1', name: '系统管理员', role: 'admin' },
     });
+    vi.mocked(authService.getAuthorizedRoutes).mockResolvedValueOnce([
+      { path: '/', name: '首页', component: 'HomePage' },
+      { path: '/dashboard', name: '仪表盘', component: 'DashboardPage' },
+      { path: '/admin', name: '管理页（需 admin）', component: 'AdminPage', roles: ['admin'] },
+    ]);
 
     const container = document.getElementById('root')!;
     const root = createRoot(container);
