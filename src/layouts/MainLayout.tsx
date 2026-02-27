@@ -1,16 +1,12 @@
 import { Button, Layout, Menu, Space, Tag, Typography } from 'antd';
+import type { ItemType } from 'antd/es/menu/interface';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuthStore } from '@/store/authStore';
 
-const menus = [
-  { key: '/', label: <Link to="/">首页</Link> },
-  { key: '/dashboard', label: <Link to="/dashboard">仪表盘</Link> },
-  { key: '/admin', label: <Link to="/admin">管理页（需 admin）</Link> },
-];
-
 export function MainLayout() {
   const user = useAuthStore((state) => state.user);
+  const authorizedRoutes = useAuthStore((state) => state.authorizedRoutes);
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,6 +15,13 @@ export function MainLayout() {
     await logout();
     navigate('/login');
   };
+
+  const menus: ItemType[] = authorizedRoutes
+    .filter((route) => !route.hidden)
+    .map((route) => ({
+      key: route.path,
+      label: <Link to={route.path}>{route.name}</Link>,
+    }));
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
