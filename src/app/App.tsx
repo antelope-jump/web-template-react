@@ -14,7 +14,12 @@ export function App() {
         },
       }}
     >
-      <RouterProvider router={router} />
+      <RouterProvider
+        future={{
+          v7_startTransition: true,
+        }}
+        router={router}
+      />
     </ConfigProvider>
   );
 }
