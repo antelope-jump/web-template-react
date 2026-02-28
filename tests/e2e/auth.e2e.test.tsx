@@ -28,13 +28,45 @@ describe('auth e2e', () => {
         name: '系统管理员',
         role: 'admin',
         dataScope: 'ALL',
-        permissions: ['home:view', 'dashboard:view', 'admin:view'],
+        permissions: [
+          'home:view',
+          'dashboard:view',
+          'admin:view',
+          'admin:user:view',
+          'admin:permission:view',
+          'admin:role:view',
+          'admin:menu:view',
+        ],
       },
     });
     vi.mocked(authService.getAuthorizedRoutes).mockResolvedValueOnce([
       { path: '/', name: '首页', component: 'HomePage' },
       { path: '/dashboard', name: '仪表盘', component: 'DashboardPage' },
       { path: '/admin', name: '管理页（需 admin）', component: 'AdminPage', roles: ['admin'] },
+      {
+        path: '/admin/users',
+        name: '用户管理',
+        component: 'UserManagementPage',
+        roles: ['admin'],
+      },
+      {
+        path: '/admin/permissions',
+        name: '权限管理',
+        component: 'PermissionManagementPage',
+        roles: ['admin'],
+      },
+      {
+        path: '/admin/roles',
+        name: '角色管理',
+        component: 'RoleManagementPage',
+        roles: ['admin'],
+      },
+      {
+        path: '/admin/menus',
+        name: '菜单管理',
+        component: 'MenuManagementPage',
+        roles: ['admin'],
+      },
     ]);
 
     const container = document.getElementById('root')!;
@@ -77,6 +109,10 @@ describe('auth e2e', () => {
 
     expect(container.textContent).toContain('React Starter');
     expect(container.textContent).toContain('React 基础框架');
+    expect(container.textContent).toContain('用户管理');
+    expect(container.textContent).toContain('权限管理');
+    expect(container.textContent).toContain('角色管理');
+    expect(container.textContent).toContain('菜单管理');
     expect(container.textContent).toContain('当前用户：系统管理员（admin）');
     root.unmount();
   });

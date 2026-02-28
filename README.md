@@ -90,6 +90,14 @@ Mock 用户能力差异：
 - `admin`：`dataScope=ALL`，包含 `dashboard:export`、`admin:user:create`、`admin:user:delete` 等权限
 - `user`：`dataScope=SELF`，仅包含首页和仪表盘查看权限
 
+Admin 账号可见完整权限后台菜单：
+
+- `/admin` 管理主页
+- `/admin/users` 用户管理
+- `/admin/permissions` 权限管理
+- `/admin/roles` 角色管理
+- `/admin/menus` 菜单管理
+
 ## 权限能力清单（当前实现）
 
 - 路由权限：支持 `roles` + `permissionCode` 双重校验
@@ -109,6 +117,22 @@ Mock 用户能力差异：
   - request: `{ refreshToken }`
 - `GET /auth/routes`
   - response: `[{ path, name, component, roles? }]`
+- `GET /admin/roles`
+  - response: `[{ id, name, code, userCount, status }]`
+- `GET /admin/role-menus`
+  - response: `[{ roleCode, menuIds[] }]`
+- `POST /admin/roles/assign-menus`
+  - request: `{ roleCode, menuIds[] }`
+- `GET /admin/users`
+  - response: `[{ id, username, nickname, status, roles[] }]`
+- `POST /admin/users/assign-roles`
+  - request: `{ userId, roles[] }`
+- `GET /admin/menus`
+  - response: `[{ id, name, path, type, permissionCode, status }]`
+- `GET /admin/permissions`
+  - response: `[{ id, module, name, code, status }]`
+- `GET /admin/role-permissions`
+  - response: `[{ id, roleName, roleCode, permissions[] }]`
 
 ## 测试
 

@@ -8,6 +8,18 @@ const pageComponentMap = {
   HomePage: lazy(async () => ({ default: (await import('@/pages/HomePage')).HomePage })),
   DashboardPage: lazy(async () => ({ default: (await import('@/pages/DashboardPage')).DashboardPage })),
   AdminPage: lazy(async () => ({ default: (await import('@/pages/AdminPage')).AdminPage })),
+  RoleManagementPage: lazy(async () => ({
+    default: (await import('@/pages/RoleManagementPage')).RoleManagementPage,
+  })),
+  MenuManagementPage: lazy(async () => ({
+    default: (await import('@/pages/MenuManagementPage')).MenuManagementPage,
+  })),
+  PermissionManagementPage: lazy(async () => ({
+    default: (await import('@/pages/PermissionManagementPage')).PermissionManagementPage,
+  })),
+  UserManagementPage: lazy(async () => ({
+    default: (await import('@/pages/UserManagementPage')).UserManagementPage,
+  })),
 };
 
 function normalizePathname(pathname: string) {
