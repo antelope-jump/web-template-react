@@ -1,5 +1,5 @@
 import { http } from '@/utils/http';
-import type { LoginPayload, LoginResult, RefreshTokenResult } from '@/types/auth';
+import type { AuthorizedRoute, LoginPayload, LoginResult, RefreshTokenResult } from '@/types/auth';
 
 export async function login(payload: LoginPayload): Promise<LoginResult> {
   const response = await http.post<LoginResult>('/auth/login', payload);
@@ -17,4 +17,9 @@ export async function logout(refreshToken: string | null) {
   }
 
   await http.post('/auth/logout', { refreshToken });
+}
+
+export async function getAuthorizedRoutes(): Promise<AuthorizedRoute[]> {
+  const response = await http.get<AuthorizedRoute[]>('/auth/routes');
+  return response.data;
 }
