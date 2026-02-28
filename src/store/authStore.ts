@@ -51,7 +51,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           ? authorizedRoutes
           : getFallbackAuthorizedRoutes(result.profile.role);
 
-
       set({
         accessToken: result.accessToken,
         refreshToken: result.refreshToken,

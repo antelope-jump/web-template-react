@@ -41,6 +41,9 @@ VITE_API_BASE_URL=https://your-api.example.com
 
 # 本地开发代理目标（dev 时把 /api 转发到后端）
 VITE_PROXY_TARGET=http://127.0.0.1:8080
+
+# 是否启用内置 Mock API（true 时关闭代理）
+VITE_ENABLE_MOCK=false
 ```
 
 建议复制一份模板再按环境修改：
@@ -53,9 +56,24 @@ cp .env.example .env
 
 ```bash
 npm run dev       # 启动前端开发环境（含 /api 本地代理）
+npm run dev:mock  # 启动前端开发环境（使用内置 Mock API）
 npm run lint      # ESLint 检查
 npm run typecheck # TypeScript 类型检查
 ```
+
+## 本地 Mock 服务
+
+项目内置了开发期 Mock API（Vite middleware），可用于前后端未联调时的本地自测：
+
+- `POST /api/auth/login`
+- `POST /api/auth/refresh`
+- `POST /api/auth/logout`
+- `GET /api/auth/routes`
+
+可用测试账号：
+
+- `admin / 123456`
+- `user / 123456`
 
 ## 后端接口约定
 
