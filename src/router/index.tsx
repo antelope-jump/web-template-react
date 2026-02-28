@@ -26,31 +26,41 @@ function withSuspense(element: ReactNode) {
   );
 }
 
-export const router = createBrowserRouter([
+export const router = createBrowserRouter(
+  [
+    {
+      path: '/login',
+      element: withSuspense(<LoginPage />),
+    },
+    {
+      path: '/',
+      element: <RouteGuard />,
+      children: [
+        {
+          element: <MainLayout />,
+          children: [
+            { index: true, element: <AuthorizedRouteRenderer /> },
+            { path: '*', element: <AuthorizedRouteRenderer /> },
+          ],
+        },
+      ],
+    },
+    {
+      path: '/403',
+      element: withSuspense(<ForbiddenPage />),
+    },
+    {
+      path: '/404',
+      element: withSuspense(<NotFoundPage />),
+    },
+    {
+      path: '*',
+      element: <Navigate replace to="/404" />,
+    },
+  ],
   {
-    path: '/login',
-    element: withSuspense(<LoginPage />),
+    future: {
+      v7_startTransition: true,
+    },
   },
-  {
-    path: '/',
-    element: <RouteGuard />,
-    children: [
-      {
-        element: <MainLayout />,
-        children: [{ path: '*', element: <AuthorizedRouteRenderer /> }],
-      },
-    ],
-  },
-  {
-    path: '/403',
-    element: withSuspense(<ForbiddenPage />),
-  },
-  {
-    path: '/404',
-    element: withSuspense(<NotFoundPage />),
-  },
-  {
-    path: '*',
-    element: <Navigate replace to="/404" />,
-  },
-]);
+);

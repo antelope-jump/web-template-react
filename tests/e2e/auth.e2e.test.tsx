@@ -1,5 +1,5 @@
+import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { act } from 'react-dom/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from '@/app/App';
@@ -38,7 +38,14 @@ describe('auth e2e', () => {
       root.render(<App />);
     });
 
-    const inputs = container.querySelectorAll('input');
+    let inputs = container.querySelectorAll('input');
+    for (let i = 0; i < 20 && inputs.length < 2; i += 1) {
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      inputs = container.querySelectorAll('input');
+    }
+
     const usernameInput = inputs[0]!;
     const passwordInput = inputs[1]!;
 
@@ -49,15 +56,20 @@ describe('auth e2e', () => {
       passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
     });
 
-    const submitButton = Array.from(container.querySelectorAll('button')).find(
-      (item) => item.textContent?.trim() === '登录',
-    ) as HTMLButtonElement;
+    const submitButton = container.querySelector('button[type="submit"]') as HTMLButtonElement;
 
     await act(async () => {
       submitButton.click();
       await Promise.resolve();
     });
 
+    for (let i = 0; i < 20 && !container.textContent?.includes('React 基础框架'); i += 1) {
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+    }
+
+    expect(container.textContent).toContain('React Starter');
     expect(container.textContent).toContain('React 基础框架');
     expect(container.textContent).toContain('当前用户：系统管理员（admin）');
     root.unmount();
