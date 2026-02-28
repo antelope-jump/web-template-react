@@ -18,6 +18,16 @@ export interface AuthorizedRoute {
   permissionCode?: string;
 }
 
+export type UserRole = UserProfile['role'];
+
+export interface AuthorizedRoute {
+  path: string;
+  name: string;
+  component: 'HomePage' | 'DashboardPage' | 'AdminPage';
+  roles?: UserRole[];
+  hidden?: boolean;
+}
+
 export interface LoginPayload {
   username: string;
   password: string;
