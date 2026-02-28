@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { Button, Card, Form, Input, Modal, Select, Space, Table, Tag, Typography, message } from 'antd';
+import { Button, Card, Form, Input, Modal, Select, Space, Table, Tag, TreeSelect, Typography, message } from 'antd';
+import type { TreeSelectProps } from 'antd';
 
 import { Permission } from '@/components/Permission';
 import { http } from '@/utils/http';
@@ -21,6 +22,17 @@ interface MenuFormValues {
   type: 'MENU' | 'BUTTON';
   permissionCode: string;
   parentId?: string;
+}
+
+interface TableMenuNode extends MenuItem {
+  children?: TableMenuNode[];
+}
+
+interface ParentTreeNode {
+  title: string;
+  value: string;
+  key: string;
+  children: ParentTreeNode[];
 }
 
 export function MenuManagementPage() {
@@ -53,10 +65,57 @@ export function MenuManagementPage() {
     }, {});
   }, [items]);
 
-  const parentOptions = useMemo(
-    () => items.filter((item) => item.type === 'MENU').map((item) => ({ label: item.name, value: item.id })),
-    [items],
-  );
+  const parentTreeOptions = useMemo<TreeSelectProps['treeData']>(() => {
+    const map = new Map<string, ParentTreeNode>();
+    items
+      .filter((item) => item.type === 'MENU')
+      .forEach((item) => {
+        map.set(item.id, {
+          title: item.name,
+          value: item.id,
+          key: item.id,
+          children: [],
+        });
+      });
+
+    const roots: ParentTreeNode[] = [];
+
+    items
+      .filter((item) => item.type === 'MENU')
+      .forEach((item) => {
+        const node = map.get(item.id);
+        if (!node) {
+          return;
+        }
+
+        if (item.parentId && map.has(item.parentId)) {
+          map.get(item.parentId)!.children.push(node);
+        } else {
+          roots.push(node);
+        }
+      });
+
+    return roots;
+  }, [items]);
+
+  const tableTreeData = useMemo<TableMenuNode[]>(() => {
+    const map = new Map<string, TableMenuNode>();
+    items.forEach((item) => {
+      map.set(item.id, { ...item, children: [] });
+    });
+
+    const roots: TableMenuNode[] = [];
+
+    map.forEach((node) => {
+      if (node.parentId && map.has(node.parentId)) {
+        map.get(node.parentId)!.children!.push(node);
+      } else {
+        roots.push(node);
+      }
+    });
+
+    return roots;
+  }, [items]);
 
   const onSubmitCreate = async () => {
     try {
@@ -93,7 +152,7 @@ export function MenuManagementPage() {
           </Permission>
         </Space>
 
-        <Table<MenuItem>
+        <Table<TableMenuNode>
           columns={[
             { title: '菜单名称', dataIndex: 'name', key: 'name' },
             {
@@ -123,7 +182,7 @@ export function MenuManagementPage() {
               ),
             },
           ]}
-          dataSource={items}
+          dataSource={tableTreeData}
           loading={loading}
           pagination={false}
           rowKey="id"
@@ -154,7 +213,12 @@ export function MenuManagementPage() {
             />
           </Form.Item>
           <Form.Item label="父级菜单" name="parentId">
-            <Select allowClear options={parentOptions} placeholder="可选，默认顶级菜单" />
+            <TreeSelect
+              allowClear
+              placeholder="可选，默认顶级菜单"
+              style={{ width: '100%' }}
+              treeData={parentTreeOptions}
+            />
           </Form.Item>
           <Form.Item label="路由路径" name="path" rules={[{ required: true, message: '请输入路径' }]}>
             <Input placeholder="例如：/admin/settings" />

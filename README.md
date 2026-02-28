@@ -102,6 +102,7 @@ Admin 账号可见完整权限后台菜单：
 
 - 路由权限：支持 `roles` + `permissionCode` 双重校验
 - 菜单权限：按 `hidden`、`permissionCode`、`order` 动态过滤与排序
+- 菜单结构：支持 `parentPath / parentId` 树形菜单（导航、菜单管理、角色分配均为树形）
 - 按钮权限：提供 `Permission` 组件与 `usePermission` Hook
 - 数据权限：用户信息包含 `dataScope` 字段（`SELF` / `DEPT` / `ALL`）
 
@@ -128,7 +129,7 @@ Admin 账号可见完整权限后台菜单：
 - `POST /admin/users/assign-roles`
   - request: `{ userId, roles[] }`
 - `GET /admin/menus`
-  - response: `[{ id, name, path, type, permissionCode, status }]`
+  - response: `[{ id, name, path, type, permissionCode, status, parentId? }]`
 - `GET /admin/permissions`
   - response: `[{ id, module, name, code, status }]`
 - `GET /admin/role-permissions`

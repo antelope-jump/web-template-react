@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { Button, Card, Modal, Select, Space, Table, Tag, Typography, message } from 'antd';
+import { Button, Card, Modal, Space, Table, Tag, TreeSelect, Typography, message } from 'antd';
+import type { TreeSelectProps } from 'antd';
 
 import { Permission } from '@/components/Permission';
 import { http } from '@/utils/http';
@@ -13,9 +14,18 @@ interface RoleItem {
   status: 'enabled' | 'disabled';
 }
 
-interface MenuOption {
-  label: string;
+interface MenuNode {
+  id: string;
+  name: string;
+  type: 'MENU' | 'BUTTON';
+  parentId?: string | null;
+}
+
+interface MenuTreeNode {
+  title: string;
   value: string;
+  key: string;
+  children: MenuTreeNode[];
 }
 
 interface RoleMenuRelation {
@@ -27,10 +37,44 @@ export function RoleManagementPage() {
   const [api, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<RoleItem[]>([]);
-  const [menuOptions, setMenuOptions] = useState<MenuOption[]>([]);
+  const [menuTreeData, setMenuTreeData] = useState<TreeSelectProps['treeData']>([]);
   const [roleMenuMap, setRoleMenuMap] = useState<Record<string, string[]>>({});
   const [assigningRole, setAssigningRole] = useState<RoleItem | null>(null);
   const [selectedMenuIds, setSelectedMenuIds] = useState<string[]>([]);
+
+  const buildMenuTreeData = (menus: MenuNode[]): TreeSelectProps['treeData'] => {
+    const nodeMap = new Map<string, MenuTreeNode>();
+
+    menus
+      .filter((menu) => menu.type === 'MENU')
+      .forEach((menu) => {
+        nodeMap.set(menu.id, {
+          title: menu.name,
+          value: menu.id,
+          key: menu.id,
+          children: [],
+        });
+      });
+
+    const roots: MenuTreeNode[] = [];
+
+    menus
+      .filter((menu) => menu.type === 'MENU')
+      .forEach((menu) => {
+        const node = nodeMap.get(menu.id);
+        if (!node) {
+          return;
+        }
+
+        if (menu.parentId && nodeMap.has(menu.parentId)) {
+          nodeMap.get(menu.parentId)!.children.push(node);
+        } else {
+          roots.push(node);
+        }
+      });
+
+    return roots;
+  };
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -38,16 +82,12 @@ export function RoleManagementPage() {
       try {
         const [roleRes, menuRes, relationRes] = await Promise.all([
           http.get<RoleItem[]>('/admin/roles'),
-          http.get<Array<{ id: string; name: string; type: 'MENU' | 'BUTTON' }>>('/admin/menus'),
+          http.get<MenuNode[]>('/admin/menus'),
           http.get<RoleMenuRelation[]>('/admin/role-menus'),
         ]);
 
         setItems(roleRes.data);
-        setMenuOptions(
-          menuRes.data
-            .filter((menu) => menu.type === 'MENU')
-            .map((menu) => ({ label: menu.name, value: menu.id })),
-        );
+        setMenuTreeData(buildMenuTreeData(menuRes.data));
         setRoleMenuMap(
           relationRes.data.reduce<Record<string, string[]>>((acc, curr) => {
             acc[curr.roleCode] = curr.menuIds;
@@ -155,12 +195,13 @@ export function RoleManagementPage() {
         <Typography.Paragraph type="secondary">
           参考若依角色菜单分配：为角色配置可访问菜单。
         </Typography.Paragraph>
-        <Select
-          mode="multiple"
-          onChange={setSelectedMenuIds}
-          options={menuOptions}
+        <TreeSelect
+          onChange={(values) => setSelectedMenuIds(values as string[])}
           placeholder="请选择该角色可访问的菜单"
+          showCheckedStrategy={TreeSelect.SHOW_PARENT}
           style={{ width: '100%' }}
+          treeCheckable
+          treeData={menuTreeData}
           value={selectedMenuIds}
         />
       </Modal>
