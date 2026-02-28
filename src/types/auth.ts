@@ -2,6 +2,28 @@ export interface UserProfile {
   id: string;
   name: string;
   role: 'admin' | 'user';
+  permissions?: string[];
+  dataScope?: 'SELF' | 'DEPT' | 'ALL';
+}
+
+export type UserRole = UserProfile['role'];
+
+export interface AuthorizedRoute {
+  path: string;
+  name: string;
+  component:
+    | 'HomePage'
+    | 'DashboardPage'
+    | 'AdminPage'
+    | 'RoleManagementPage'
+    | 'MenuManagementPage'
+    | 'PermissionManagementPage'
+    | 'UserManagementPage';
+  roles?: UserRole[];
+  hidden?: boolean;
+  parentPath?: string;
+  order?: number;
+  permissionCode?: string;
 }
 
 export interface LoginPayload {
@@ -16,6 +38,7 @@ export interface AuthTokens {
 
 export interface LoginResult extends AuthTokens {
   profile: UserProfile;
+  routes?: AuthorizedRoute[];
 }
 
 export interface RefreshTokenResult {
