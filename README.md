@@ -33,7 +33,20 @@ src/
 
 ## 环境变量
 
-默认请求地址为 `/api`，并支持本地开发代理（Vite `server.proxy`），可通过 `.env` 覆盖：
+默认请求地址为 `/api`，并支持本地开发代理（Vite `server.proxy`）。
+
+本项目已提供：
+
+- `.env.example`：环境变量模板
+- `.env.development`：开发环境默认值（`npm run dev` 会自动加载）
+
+如需自定义，建议创建 `.env.development.local`（不提交到仓库）覆盖本地配置：
+
+```bash
+cp .env.example .env.development.local
+```
+
+可用变量：
 
 ```bash
 # 浏览器请求前缀
@@ -46,11 +59,7 @@ VITE_PROXY_TARGET=http://127.0.0.1:8080
 VITE_ENABLE_MOCK=false
 ```
 
-建议复制一份模板再按环境修改：
-
-```bash
-cp .env.example .env
-```
+> 说明：`vite.config.ts` 使用 `loadEnv(mode, process.cwd(), 'VITE_')`，仅加载 `VITE_` 前缀变量，符合 Vite 推荐方式。
 
 ## 开发与质量检查
 
