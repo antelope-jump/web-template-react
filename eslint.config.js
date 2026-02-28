@@ -5,12 +5,13 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  { ignores: ['dist', 'coverage', 'node_modules', 'playwright-report'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended, prettier],
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2020,
+      sourceType: 'module',
     },
     plugins: {
       'react-hooks': reactHooks,
@@ -20,7 +21,7 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': [
         'warn',
-        { allowConstantExport: true },
+        { allowConstantExport: true, allowExportNames: ['useAuth'] },
       ],
       '@typescript-eslint/consistent-type-imports': [
         'error',
@@ -36,6 +37,7 @@ export default tseslint.config(
           varsIgnorePattern: '^_',
         },
       ],
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
     },
   },
 );
