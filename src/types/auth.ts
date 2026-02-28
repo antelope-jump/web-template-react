@@ -2,6 +2,20 @@ export interface UserProfile {
   id: string;
   name: string;
   role: 'admin' | 'user';
+  permissions?: string[];
+  dataScope?: 'SELF' | 'DEPT' | 'ALL';
+}
+
+export type UserRole = UserProfile['role'];
+
+export interface AuthorizedRoute {
+  path: string;
+  name: string;
+  component: 'HomePage' | 'DashboardPage' | 'AdminPage';
+  roles?: UserRole[];
+  hidden?: boolean;
+  order?: number;
+  permissionCode?: string;
 }
 
 export type UserRole = UserProfile['role'];

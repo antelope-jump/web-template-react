@@ -23,7 +23,13 @@ describe('auth e2e', () => {
     vi.mocked(authService.login).mockResolvedValueOnce({
       accessToken: 'a1',
       refreshToken: 'r1',
-      profile: { id: '1', name: '系统管理员', role: 'admin' },
+      profile: {
+        id: '1',
+        name: '系统管理员',
+        role: 'admin',
+        dataScope: 'ALL',
+        permissions: ['home:view', 'dashboard:view', 'admin:view'],
+      },
     });
     vi.mocked(authService.getAuthorizedRoutes).mockResolvedValueOnce([
       { path: '/', name: '首页', component: 'HomePage' },

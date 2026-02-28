@@ -5,6 +5,7 @@
 - ✅ React 18 + Vite 6 + TypeScript 5
 - ✅ React Router 6 路由体系（含 404）
 - ✅ 支持后端返回鉴权路由并动态渲染菜单/页面
+- ✅ 支持角色 + 权限点（Permission Code）+ 数据范围（Data Scope）
 - ✅ 页面级懒加载（`React.lazy` + `Suspense`）
 - ✅ Zustand 统一状态管理（登录态、用户信息）
 - ✅ 真实后端认证流程（登录 + 刷新 token + 登出）
@@ -83,6 +84,18 @@ npm run typecheck # TypeScript 类型检查
 
 - `admin / 123456`
 - `user / 123456`
+
+Mock 用户能力差异：
+
+- `admin`：`dataScope=ALL`，包含 `dashboard:export`、`admin:user:create`、`admin:user:delete` 等权限
+- `user`：`dataScope=SELF`，仅包含首页和仪表盘查看权限
+
+## 权限能力清单（当前实现）
+
+- 路由权限：支持 `roles` + `permissionCode` 双重校验
+- 菜单权限：按 `hidden`、`permissionCode`、`order` 动态过滤与排序
+- 按钮权限：提供 `Permission` 组件与 `usePermission` Hook
+- 数据权限：用户信息包含 `dataScope` 字段（`SELF` / `DEPT` / `ALL`）
 
 ## 后端接口约定
 

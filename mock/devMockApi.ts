@@ -8,22 +8,66 @@ interface MockUser {
   password: string;
   name: string;
   role: 'admin' | 'user';
+  dataScope: 'SELF' | 'DEPT' | 'ALL';
+  permissions: string[];
 }
 
 const mockUsers: MockUser[] = [
-  { id: '1', username: 'admin', password: '123456', name: '系统管理员', role: 'admin' },
-  { id: '2', username: 'user', password: '123456', name: '普通用户', role: 'user' },
+  {
+    id: '1',
+    username: 'admin',
+    password: '123456',
+    name: '系统管理员',
+    role: 'admin',
+    dataScope: 'ALL',
+    permissions: [
+      'home:view',
+      'dashboard:view',
+      'dashboard:export',
+      'admin:view',
+      'admin:user:create',
+      'admin:user:delete',
+    ],
+  },
+  {
+    id: '2',
+    username: 'user',
+    password: '123456',
+    name: '普通用户',
+    role: 'user',
+    dataScope: 'SELF',
+    permissions: ['home:view', 'dashboard:view'],
+  },
 ];
 
 const mockRoutesByRole = {
   admin: [
-    { path: '/', name: '首页', component: 'HomePage' },
-    { path: '/dashboard', name: '仪表盘', component: 'DashboardPage' },
-    { path: '/admin', name: '管理页（需 admin）', component: 'AdminPage', roles: ['admin'] },
+    { path: '/', name: '首页', component: 'HomePage', order: 1, permissionCode: 'home:view' },
+    {
+      path: '/dashboard',
+      name: '仪表盘',
+      component: 'DashboardPage',
+      order: 2,
+      permissionCode: 'dashboard:view',
+    },
+    {
+      path: '/admin',
+      name: '管理页（需 admin）',
+      component: 'AdminPage',
+      roles: ['admin'],
+      order: 3,
+      permissionCode: 'admin:view',
+    },
   ],
   user: [
-    { path: '/', name: '首页', component: 'HomePage' },
-    { path: '/dashboard', name: '仪表盘', component: 'DashboardPage' },
+    { path: '/', name: '首页', component: 'HomePage', order: 1, permissionCode: 'home:view' },
+    {
+      path: '/dashboard',
+      name: '仪表盘',
+      component: 'DashboardPage',
+      order: 2,
+      permissionCode: 'dashboard:view',
+    },
   ],
 } as const;
 
@@ -101,6 +145,8 @@ export function createDevMockApiPlugin(): Plugin {
                 id: user.id,
                 name: user.name,
                 role: user.role,
+                dataScope: user.dataScope,
+                permissions: user.permissions,
               },
               routes: mockRoutesByRole[user.role],
             });

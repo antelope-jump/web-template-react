@@ -22,6 +22,7 @@ export function AuthorizedRouteRenderer() {
   const pathname = normalizePathname(location.pathname);
   const user = useAuthStore((state) => state.user);
   const authorizedRoutes = useAuthStore((state) => state.authorizedRoutes);
+  const hasPermission = useAuthStore((state) => state.hasPermission);
 
   const matchedRoute = authorizedRoutes.find((route) => route.path === pathname);
 
@@ -30,6 +31,10 @@ export function AuthorizedRouteRenderer() {
   }
 
   if (matchedRoute.roles && (!user || !matchedRoute.roles.includes(user.role))) {
+    return <Navigate replace to="/403" />;
+  }
+
+  if (matchedRoute.permissionCode && !hasPermission(matchedRoute.permissionCode)) {
     return <Navigate replace to="/403" />;
   }
 

@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/authStore';
 export function MainLayout() {
   const user = useAuthStore((state) => state.user);
   const authorizedRoutes = useAuthStore((state) => state.authorizedRoutes);
+  const hasPermission = useAuthStore((state) => state.hasPermission);
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
   const location = useLocation();
@@ -17,7 +18,11 @@ export function MainLayout() {
   };
 
   const menus: ItemType[] = authorizedRoutes
-    .filter((route) => !route.hidden)
+    .filter(
+      (route) =>
+        !route.hidden && (!route.permissionCode || hasPermission(route.permissionCode)),
+    )
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
     .map((route) => ({
       key: route.path,
       label: <Link to={route.path}>{route.name}</Link>,
@@ -40,6 +45,7 @@ export function MainLayout() {
         />
         <Space>
           <Tag color="blue">当前用户：{user?.name ?? '-'}（{user?.role ?? '-'}）</Tag>
+          <Tag color="purple">数据范围：{user?.dataScope ?? '-'}</Tag>
           <Button onClick={handleLogout}>退出登录</Button>
         </Space>
       </Layout.Header>

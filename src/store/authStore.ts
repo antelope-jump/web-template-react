@@ -23,11 +23,22 @@ interface AuthState {
   loading: boolean;
   error: string;
   clearError: () => void;
+  hasPermission: (permission: string) => boolean;
+  hasAnyPermission: (permissions: string[]) => boolean;
   login: (payload: LoginPayload) => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
-const initialUser = getProfile();
+function normalizeUserProfile(user: UserProfile): UserProfile {
+  return {
+    ...user,
+    permissions: user.permissions ?? [],
+    dataScope: user.dataScope ?? 'SELF',
+  };
+}
+
+const profileFromStorage = getProfile();
+const initialUser = profileFromStorage ? normalizeUserProfile(profileFromStorage) : null;
 const storedRoutes = getAuthorizedRoutes();
 const initialRoutes =
   storedRoutes.length > 0 ? storedRoutes : getFallbackAuthorizedRoutes(initialUser?.role);
@@ -40,6 +51,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   loading: false,
   error: '',
   clearError: () => set({ error: '' }),
+  hasPermission: (permission) => {
+    const permissions = get().user?.permissions ?? [];
+    return permissions.includes(permission);
+  },
+  hasAnyPermission: (permissions) => {
+    const userPermissions = get().user?.permissions ?? [];
+    return permissions.some((permission) => userPermissions.includes(permission));
+  },
   login: async (payload) => {
     set({ loading: true, error: '' });
     try {
@@ -50,17 +69,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         authorizedRoutes.length > 0
           ? authorizedRoutes
           : getFallbackAuthorizedRoutes(result.profile.role);
+      const normalizedProfile = normalizeUserProfile(result.profile);
 
       set({
         accessToken: result.accessToken,
         refreshToken: result.refreshToken,
-        user: result.profile,
+        user: normalizedProfile,
         authorizedRoutes: safeRoutes,
         loading: false,
       });
       setToken(result.accessToken);
       setRefreshToken(result.refreshToken);
-      setProfile(result.profile);
+      setProfile(normalizedProfile);
       setAuthorizedRoutes(safeRoutes);
       return true;
     } catch (error) {
