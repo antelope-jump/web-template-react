@@ -1,16 +1,13 @@
 import { Button, Layout, Menu, Space, Tag, Typography } from 'antd';
+import type { ItemType } from 'antd/es/menu/interface';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuthStore } from '@/store/authStore';
 
-const menus = [
-  { key: '/', label: <Link to="/">首页</Link> },
-  { key: '/dashboard', label: <Link to="/dashboard">仪表盘</Link> },
-  { key: '/admin', label: <Link to="/admin">管理页（需 admin）</Link> },
-];
-
 export function MainLayout() {
   const user = useAuthStore((state) => state.user);
+  const authorizedRoutes = useAuthStore((state) => state.authorizedRoutes);
+  const hasPermission = useAuthStore((state) => state.hasPermission);
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,6 +16,17 @@ export function MainLayout() {
     await logout();
     navigate('/login');
   };
+
+  const menus: ItemType[] = authorizedRoutes
+    .filter(
+      (route) =>
+        !route.hidden && (!route.permissionCode || hasPermission(route.permissionCode)),
+    )
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    .map((route) => ({
+      key: route.path,
+      label: <Link to={route.path}>{route.name}</Link>,
+    }));
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -37,6 +45,7 @@ export function MainLayout() {
         />
         <Space>
           <Tag color="blue">当前用户：{user?.name ?? '-'}（{user?.role ?? '-'}）</Tag>
+          <Tag color="purple">数据范围：{user?.dataScope ?? '-'}</Tag>
           <Button onClick={handleLogout}>退出登录</Button>
         </Space>
       </Layout.Header>
